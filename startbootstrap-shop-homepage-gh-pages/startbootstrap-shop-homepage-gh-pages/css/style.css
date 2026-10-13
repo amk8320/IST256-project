@@ -1,0 +1,55 @@
+/* ===== Custom styles for our storefront =====
+   Loaded AFTER styles.css, so anything here overrides Bootstrap/template defaults. */
+
+/* Brand colors */
+:root {
+    --brand-dark: #1f2a44;
+    --brand-accent: #f0a500;
+}
+
+/* Navbar */
+.navbar {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+.navbar-brand {
+    font-weight: 700;
+    color: var(--brand-dark) !important;
+}
+
+/* Header / hero banner */
+.hero-header {
+    background: linear-gradient(135deg, var(--brand-dark) 0%, #3b4f7a 100%);
+}
+.hero-header h1 {
+    letter-spacing: 1px;
+}
+
+/* Product cards */
+.product-card {
+    border: none;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15);
+}
+
+/* Sale badge (moved out of the inline style="" attributes) */
+.sale-badge {
+    top: 0.5rem;
+    right: 0.5rem;
+    background-color: var(--brand-accent) !important;
+    color: #000 !important;
+}
+
+/* Buttons */
+.btn-outline-dark:hover {
+    background-color: var(--brand-dark);
+    border-color: var(--brand-dark);
+}
+
+/* Footer */
+.site-footer {
+    background-color: var(--brand-dark) !important;
+}
