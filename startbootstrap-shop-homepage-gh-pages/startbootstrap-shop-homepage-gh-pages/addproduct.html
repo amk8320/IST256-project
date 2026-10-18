@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <title>User Signup</title>
+        <title>Add Product</title>
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
         <link href="css/styles.css" rel="stylesheet" />
@@ -49,58 +49,64 @@
         <main class="container py-5" style="max-width: 650px;">
             <div class="card shadow-sm">
                 <div class="card-body p-4">
-                    <h1 class="text-center mb-2">Create an Account</h1>
-                    <p class="lead mb-4">Please fill out the form below to create an account.</p>
+                    <h1 class="text-center mb-2">Add a Product</h1>
+                    <p class="lead mb-4">Please fill out the form below to add a new product.</p>
 
 
-                    <form id="signup-form">
+                    <form id="product-form">
                         <div class="mb-3">
-                            <label for="fullName" class="form-label">Full Name *</label>
-                            <input type="text" class="form-control" name="fullName"id="fullName" required>
+                            <label for="productId" class="form-label">Product ID*</label>
+                            <input type="text" class="form-control" name="productId" id="productId" required>
         
                             <div class="invalid-feedback">
-                                Please enter your full name.
+                                Please enter a unique product ID.
                                 </div>
                         </div>
 
-                        <div class = "mb-3">
-                            <label for="age" class="form-label">Age *</label>
-                            <input type="number" class="form-control" min="1" max="120" 
-                            step="1" name="age" id="age" required>
+                        <div class="mb-3">
+                            <label for="productName" class="form-label">Shoe Name / Product Description *</label>
+                            <input type="text" class="form-control" name="productName" id="productName" required>
+        
                             <div class="invalid-feedback">
-                                Please enter a valid age between 1 and 120.
-                            </div>
+                                Please enter a description for the product.
+                                </div>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email address *</label>
-                            <input type="email" class="form-control" id="email" required>
+                            <label for="shoeType" class="form-label">Shoe type *</label>
+                            <select type="text" class="form-select" name="shoeType" id="shoeType" required>
+                                <option value="">Select a shoe type</option>
+                                <option value="Running">Running</option>
+                                <option value="Casual">Casual</option>
+                                <option value="Basketball">Basketball</option>
+                                <option value="Boots">Boots</option>
+                                <option value="Dress">Dress</option>
+                                <option value="Other">Other</option>
+                            </select>
                             <div class="invalid-feedback">
-                                Please enter a valid email address.
+                                Please select the type of shoe.
+                                </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="shoeSize" class="form-label">Shoe Size *</label>
+                            <input type="number" class="form-control" id="shoeSize" 
+                            name= "shoeSize" min="1" max="18" step="0.5" required>
+                            <div class="invalid-feedback">
+                                Please enter the shoe size.
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="address" class="form-label">Address *</label>
-                            <input type="text" class="form-control" id="address" required>
+                            <label for="price" class="form-label">Price *</label>
+                            <input type="number" class="form-control" id="price" name="price" min="0" step="0.01" required>
                             <div class="invalid-feedback">
-                                Please enter your address.
+                                Please enter the price.
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="phone" class="form-label">Phone Number (Optional)</label>
-                            <input type="tel" class="form-control" id="phone">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password *</label>
-                            <input type="password" class="form-control" id="password" required>
-                            <div class="invalid-feedback">
-                                Please enter a password.
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-dark w-100">Sign Up</button>
+            
+                        <button type="submit" class="btn btn-dark w-100">Submit</button>
                     </form>
                     <div id="formMessage" class="mt-3" role="status"></div>
                     <hr class="my-4">
@@ -113,35 +119,33 @@
 
         </main>
     <script>
-        const form = document.getElementById('signup-form');
+        const form = document.getElementById('product-form');
         const message = document.getElementById('formMessage');
         const jsonOutput = document.getElementById('jsonOutput');
         const downloadButton = document.getElementById('downloadJson');
 
-        let users =[];
+        let products =[];
 
         try{
-            users = JSON.parse(localStorage.getItem('signupUsers')) || [];
-            if (!Array.isArray(users)) {
-                users = [];
+            products = JSON.parse(localStorage.getItem('productData')) || [];
+            if (!Array.isArray(products)) {
+                products = [];
             }
         }
         catch (error) {
             console.error('Error parsing JSON from localStorage:', error);
-            users = [];
+            products = [];
         }
-        function displayUsers() {
-            jsonOutput.textContent = JSON.stringify(users, null, 2);
+        function displayProducts() {
+            jsonOutput.textContent = JSON.stringify(products, null, 2);
         }
-        displayUsers();
+        displayProducts();
 
 
         form.addEventListener('submit', function(event) {
             event.preventDefault();
-            const ageInput = document.getElementById('age');
-            const age = Number(ageInput.value);
 
-            if (!form.checkValidity() || !Number.isInteger(age) || age < 1 || age > 120) {
+            if (!form.checkValidity()) {
                 form.classList.add('was-validated');
                 message.textContent = 'Please fill out all required fields correctly.';
                 message.className = "mt-3 text-danger";
@@ -149,41 +153,37 @@
                 return;
             }
             
-            const user = {
-                fullName: form.fullName.value,
-                age: form.age.value,
-                email: form.email.value,
-                address: form.address.value,
-                phone: form.phone.value,
-                password: form.password.value
+            const product = {
+                productId: document.getElementById('productId').value.trim(),
+                productName: document.getElementById('productName').value.trim(),
+                shoeType: document.getElementById('shoeType').value,
+                shoeSize: Number(document.getElementById('shoeSize').value),
+                price: Number(document.getElementById('price').value)
             };
-            if (!user.fullName || !user.email || !user.address || !user.password) {
-                message.textContent = 'Please fill out all required fields.';
-                message.className = "mt-3 text-danger";
-                return;
+            
+            products.push(product);
+            try {
+            localStorage.setItem('productData', JSON.stringify(products));
+                }
+            catch (error) {
+                    products.pop();
+                    message.textContent = 'Error saving product data.';
+                    message.className = 'mt-3 text-danger';
+                    return;
             }
-            users.push(user);
-            try{
-                localStorage.setItem('signupUsers', JSON.stringify(users));
-            } catch (error) {
-                users.pop(); 
-                message.textContent = 'Error saving user data. Please try again.';
-                message.className = "mt-3 text-danger";
-                return;
-            }
-            displayUsers();
-            message.textContent = 'User data saved successfully!';
+            displayProducts();
+            message.textContent = 'Product data saved successfully!';
             message.className = "mt-3 text-success";
             form.reset();
             form.classList.remove('was-validated');
         });
         downloadButton.addEventListener('click', function() {
-            const jsonData = JSON.stringify(users, null, 2);
+            const jsonData = JSON.stringify(products, null, 2);
             const blob = new Blob([jsonData], { type: 'application/json' });         
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'signupUsers.json';
+            a.download = 'shoeProducts.json';
             document.body.appendChild(a);
             a.click();
             URL.revokeObjectURL(url);
