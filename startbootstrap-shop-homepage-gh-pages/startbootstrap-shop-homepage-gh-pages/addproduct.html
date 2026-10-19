@@ -150,7 +150,8 @@
         const message = document.getElementById('formMessage');
         const jsonOutput = document.getElementById('jsonOutput');
         const downloadButton = document.getElementById('downloadJson');
-
+        const searchBox = document.getElementById('searchBox');
+        const productTableBody = document.querySelector('#productTable tbody');
         let products =[];
 
         try{
@@ -165,7 +166,30 @@
         }
         function displayProducts() {
             jsonOutput.textContent = JSON.stringify(products, null, 2);
+            const searchTerm = searchBox.value.toLowerCase().trim();
+            productTableBody.innerHTML = '';
+            products.forEach((product, index) => {
+                if (
+                    product.productId.toLowerCase().includes(searchTerm) ||
+                    product.productName.toLowerCase().includes(searchTerm) ||
+                    product.shoeType.toLowerCase().includes(searchTerm)
+                ) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${product.productId}</td>
+                        <td>${product.productName}</td>
+                        <td>${product.shoeType}</td>
+                        <td>${product.shoeSize}</td>
+                        <td>${product.unit || ''}</td>
+                        <td>$${product.price.toFixed(2)}</td>
+                        <td>${product.weight || ''}</td>
+                        <td><button class="btn btn-sm btn-outline-danger delete-btn" data-index="${index}">Delete</button></td>
+                    `;
+                    productTableBody.appendChild(row);
+                }
+            });
         }
+        searchBox.addEventListener('input', displayProducts);
         displayProducts();
 
 
@@ -185,7 +209,9 @@
                 productName: document.getElementById('productName').value.trim(),
                 shoeType: document.getElementById('shoeType').value,
                 shoeSize: Number(document.getElementById('shoeSize').value),
-                price: Number(document.getElementById('price').value)
+                unit: document.getElementById('unit').value,
+                price: Number(document.getElementById('price').value),
+                weight: document.getElementById('weight').value.trim()
             };
             
             products.push(product);
