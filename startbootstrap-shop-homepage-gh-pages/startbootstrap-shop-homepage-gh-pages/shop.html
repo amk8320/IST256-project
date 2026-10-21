@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>Shop Homepage - Start Bootstrap Template</title>
+        <title>Shop Shoes - Penn State Shoe Central</title>
         <!-- Favicon-->
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
         <!-- Bootstrap icons-->
@@ -54,11 +54,31 @@
         <header class="bg-dark py-5">
             <div class="container px-4 px-lg-5 my-5">
                 <div class="text-center text-white">
-                        <h1 class="display-4 fw-bolder">Shop in Style</h1>
-                    <p class="lead fw-normal text-white-50 mb-0">With this shop homepage template</p>
+                        <h1 class="display-4 fw-bolder">Shop Our Shoes</h1>
+                    <p class="lead fw-normal text-white-50 mb-0">Search, add to cart, and check out</p>
                 </div>
             </div>
         </header>
+        <section class="py-4 bg-light">
+          <div class="container px-4 px-lg-5">
+            <h2 class="h4 mb-3">Search Shoes</h2>
+            <input type="search" id="searchBox" class="form-control mb-3" placeholder="Search by ID, shoe name, or type (e.g. Running)...">
+            <div id="searchResults" class="list-group mb-4"></div>
+
+            <h2 class="h4 mb-3">Your Shoe Cart</h2>
+            <div class="table-responsive">
+              <table class="table table-striped align-middle" id="cartTable">
+                <thead class="table-dark">
+                  <tr><th>ID</th><th>Shoe</th><th>Type</th><th>Size</th><th>Unit</th><th>Price</th><th></th></tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <p class="fw-bold text-end">Total: $<span id="cartTotal">0.00</span></p>
+            <div id="cartMessage" role="status"></div>
+            <button type="button" id="sendCartBtn" class="btn btn-dark">Send Cart to API</button>
+          </div>
+        </section>
         <!-- Section-->
         <section class="py-5">
             <div class="container px-4 px-lg-5 mt-5">
@@ -173,8 +193,8 @@
                                     <!-- Product name-->
                                     <h5 class="fw-bolder">Dress Shoes</h5>
                                     <!-- Product price-->
-                                    <span class="text-muted text-decoration-line-through">$50.00</span>
-                                    $85.00
+                                    <span class="text-muted text-decoration-line-through">$85.00</span>
+                                    $50.00
                                 </div>
                             </div>
                             <!-- Product actions-->
@@ -266,10 +286,12 @@
         </section>
         <!-- Footer-->
         <footer class="py-5 bg-dark">
-            <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Your Website 2023</p></div>
+            <div class="container"><p class="m-0 text-center text-white">Copyright &copy; PSU IST256 2026</p></div>
         </footer>
         <!-- Bootstrap core JS-->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
         <!-- Core theme JS-->
         <script src="js/scripts.js"></script>
     </body>
