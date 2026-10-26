@@ -96,7 +96,9 @@
                             </div>
                             <!-- Product actions-->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">Add to Cart</a></div>
+                                <button class="btn btn-outline-dark mt-auto add-to-cart" href="cart.html"data-id="SHOE001">
+                                    Add to Cart
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -126,7 +128,9 @@
                             </div>
                             <!-- Product actions-->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">Add to Cart</a></div>
+                                <button class="btn btn-outline-dark mt-auto add-to-cart" href="cart.html"data-id="SHOE002">
+                                    Add to Cart
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -148,7 +152,9 @@
                             </div>
                             <!-- Product actions-->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">Add to Cart</a></div>
+                                <button class="btn btn-outline-dark mt-auto add-to-cart" href="cart.html"data-id="SHOE003">
+                                    Add to Cart
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -175,7 +181,9 @@
                             </div>
                             <!-- Product actions-->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">Add to Cart</a></div>
+                                <button class="btn btn-outline-dark mt-auto add-to-cart" href="cart.html"data-id="SHOE004">
+                                    Add to Cart
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -197,7 +205,9 @@
                             </div>
                             <!-- Product actions-->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">Add to Cart</a></div>
+                                <button class="btn btn-outline-dark mt-auto add-to-cart" href="cart.html"data-id="SHOE005">
+                                    Add to Cart
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -216,7 +226,9 @@
                             </div>
                             <!-- Product actions-->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">Add to Cart</a></div>
+                                <button class="btn btn-outline-dark mt-auto add-to-cart" href="cart.html" data-id="SHOE006">
+                                    Add to Cart
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -246,7 +258,11 @@
                             </div>
                             <!-- Product actions-->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">Add to Cart</a></div>
+                                <div class="text-center">
+                                    <button class="btn btn-outline-dark mt-auto add-to-cart" href="cart.html" data-id="SHOE007">
+                                        Add to Cart
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -273,7 +289,11 @@
                                  </div>
                             <!-- Product actions-->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">Add to Cart</a></div>
+                                <div class="text-center">
+                                    <button class="btn btn-outline-dark mt-auto add-to-cart" href="cart.html" data-id="SHOE008">
+                                        Add to Cart
+                                    </button>
+                                </div>
                             </div>
                             </div>
 
@@ -291,6 +311,81 @@
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
         <!-- Core theme JS-->
-        <script src="js/scripts.js"></script>
+        <script>
+                const defaultProducts = [
+                    {
+                        productId: "SHOE001",
+                        productName: "New Balance 9060",
+                        shoeType: "Casual",
+                        shoeSize: 10,
+                        unit: "Pair",
+                        price: 160,
+                        weight: ""
+                    },
+                    {
+                        productId: "SHOE002",
+                        productName: "Nike Running Sneakers",
+                        shoeType: "Running",
+                        shoeSize: 10,
+                        unit: "Pair",
+                        price: 80,
+                        weight: ""
+                    },
+                    {
+                        productId: "SHOE003",
+                        productName: "Boots",
+                        shoeType: "Boots",
+                        shoeSize: 10,
+                        unit: "Pair",
+                        price: 100,
+                        weight: ""
+                    }
+                ];
+                //makes it productData
+                localStorage.setItem(
+                'productData',
+                JSON.stringify(defaultProducts)
+                );
+
+                
+             document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', function() {
+
+                    //get id
+                    const productId = this.dataset.id;
+
+                    //get itemData
+                    const products = JSON.parse(
+                        localStorage.getItem('productData') || '[]'
+                    );
+
+                    //find which product has that id
+                    const product = products.find(
+                        p => p.productId === productId
+                    );
+                    //display that its not there
+                    if (!product) {
+                        alert("Product not found!");
+                        return;
+                    }
+
+                    //get the current cart list from localStorage
+                    const cart = JSON.parse(
+                        localStorage.getItem('shoppingCart') || '[]'
+                    );
+
+                    //add to cart array
+                    cart.push(product);
+
+                    localStorage.setItem(
+                        'shoppingCart',
+                        JSON.stringify(cart)
+                    );
+
+                    alert(product.productName + " added to cart!");
+                });
+            });
+        </script>
+
     </body>
 </html>
