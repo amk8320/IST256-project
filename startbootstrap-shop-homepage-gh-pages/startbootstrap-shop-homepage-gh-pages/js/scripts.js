@@ -5,3 +5,16 @@
 */
 // This file is intentionally blank
 // Use this file to add JavaScript to your project
+const searchBox = document.getElementById('searchBox');
+const cards = document.querySelectorAll(".card.h-100");
+
+searchBox.addEventListener("input", () => {
+    const query = searchBox.value.toLocaleLowerCase().trim();
+
+    cards.forEach(card => {
+        const name = card.querySelector("h5").textContent.toLowerCase();
+        card.closest(".col").style.display = name.includes(query) ? "" : "none";
+    });
+});
+
+    
