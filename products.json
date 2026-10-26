@@ -3,5 +3,8 @@
   { "productId": "SH-002", "productName": "Nike LeBron 21", "shoeType": "Basketball", "shoeSize": 11, "unit": "Pair", "price": 199.99, "weight": "16 oz" },
   { "productId": "SH-003", "productName": "Converse Chuck Taylor All Star", "shoeType": "Casual", "shoeSize": 9, "unit": "Pair", "price": 65, "weight": "13 oz" },
   { "productId": "SH-004", "productName": "Timberland 6-Inch Premium Waterproof Boot", "shoeType": "Boots", "shoeSize": 10, "unit": "Pair", "price": 198, "weight": "30 oz" },
-  { "productId": "SH-005", "productName": "Allen Edmonds Park Avenue Oxford", "shoeType": "Dress", "shoeSize": 10, "unit": "Pair", "price": 395, "weight": "" }
+  { "productId": "SH-005", "productName": "Allen Edmonds Park Avenue Oxford", "shoeType": "Dress", "shoeSize": 10, "unit": "Pair", "price": 395, "weight": "" },
+  { "productId": "SH-006", "productName": "New Balance 9060", "shoeType": "Casual", "shoeSize": 10, "unit": "Pair", "price": 160, "weight": "14 oz" },
+  { "productId": "SH-007", "productName": "UGG Tasman Slippers", "shoeType": "Casual", "shoeSize": 9, "unit": "Pair", "price": 130, "weight": "12 oz" },
+  { "productId": "SH-008", "productName": "On Cloud Sneakers", "shoeType": "Running", "shoeSize": 10, "unit": "Pair", "price": 170, "weight": "9 oz" }
 ]

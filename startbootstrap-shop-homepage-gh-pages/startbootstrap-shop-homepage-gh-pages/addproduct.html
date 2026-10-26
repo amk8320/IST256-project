@@ -145,8 +145,9 @@
             </div>
 
         </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const form = document.getElementById('product-form');
+                const form = document.getElementById('product-form');
         const message = document.getElementById('formMessage');
         const jsonOutput = document.getElementById('jsonOutput');
         const downloadButton = document.getElementById('downloadJson');
@@ -203,7 +204,7 @@
                 form.reportValidity();
                 return;
             }
-            
+
             const product = {
                 productId: document.getElementById('productId').value.trim(),
                 productName: document.getElementById('productName').value.trim(),
@@ -213,16 +214,16 @@
                 price: Number(document.getElementById('price').value),
                 weight: document.getElementById('weight').value.trim()
             };
-            
+
             products.push(product);
             try {
-            localStorage.setItem('productData', JSON.stringify(products));
-                }
+                localStorage.setItem('productData', JSON.stringify(products));
+            }
             catch (error) {
-                    products.pop();
-                    message.textContent = 'Error saving product data.';
-                    message.className = 'mt-3 text-danger';
-                    return;
+                products.pop();
+                message.textContent = 'Error saving product data.';
+                message.className = 'mt-3 text-danger';
+                return;
             }
             displayProducts();
             message.textContent = 'Product data saved successfully!';
@@ -232,7 +233,7 @@
         });
         downloadButton.addEventListener('click', function() {
             const jsonData = JSON.stringify(products, null, 2);
-            const blob = new Blob([jsonData], { type: 'application/json' });         
+            const blob = new Blob([jsonData], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
