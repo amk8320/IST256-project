@@ -394,9 +394,10 @@
 
                 const info = document.createElement('div');
                 info.className = 'text-muted small';
+                
                 info.textContent =
                     `${product.productId} | ${product.shoeType} | ` +
-                    `Size ${product.shoeSize} | $${Number(product.price).toFixed(2)}`;
+                    `$${Number(product.price).toFixed(2)}`;
 
                 details.appendChild(name);
                 details.appendChild(info);
