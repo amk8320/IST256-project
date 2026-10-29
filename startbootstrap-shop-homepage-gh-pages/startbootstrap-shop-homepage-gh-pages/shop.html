@@ -353,6 +353,68 @@
             });
             localStorage.setItem('productData', JSON.stringify(productData));
 
+            const searchBox = document.getElementById('searchBox');
+            const searchResults = document.getElementById('searchResults');
+
+// Search shoes by ID, name, or type
+            function displaySearchResults() {
+            const searchTerm = searchBox.value.toLowerCase().trim();
+            searchResults.innerHTML = '';
+
+                if (searchTerm === '') {
+            return;
+            }
+
+            const products = JSON.parse(
+            localStorage.getItem('productData') || '[]'
+            );
+
+            const filteredProducts = products.filter(product =>
+                (product.productId || '').toLowerCase().includes(searchTerm) ||
+                (product.productName || '').toLowerCase().includes(searchTerm) ||
+                (product.shoeType || '').toLowerCase().includes(searchTerm)
+            );
+
+            if (filteredProducts.length === 0) {
+                searchResults.innerHTML =
+                    '<p class="text-muted">No shoes found.</p>';
+                return;
+            }
+
+            filteredProducts.forEach(product => {
+                const result = document.createElement('div');
+                result.className =
+                    'list-group-item d-flex justify-content-between align-items-center';
+
+                const details = document.createElement('div');
+                details.innerHTML = '';
+
+                const name = document.createElement('strong');
+                name.textContent = product.productName;
+
+                const info = document.createElement('div');
+                info.className = 'text-muted small';
+                info.textContent =
+                    `${product.productId} | ${product.shoeType} | ` +
+                    `Size ${product.shoeSize} | $${Number(product.price).toFixed(2)}`;
+
+                details.appendChild(name);
+                details.appendChild(info);
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'btn btn-outline-dark btn-sm search-add-to-cart';
+                button.textContent = 'Add to Cart';
+                button.dataset.id = product.productId;
+
+                result.appendChild(details);
+                result.appendChild(button);
+                searchResults.appendChild(result);
+            });
+        }
+
+            searchBox.addEventListener('input', displaySearchResults);
+
             // ============================================================
             //  Cart helpers (cart is stored in localStorage as 'shoppingCart')
             // ============================================================
