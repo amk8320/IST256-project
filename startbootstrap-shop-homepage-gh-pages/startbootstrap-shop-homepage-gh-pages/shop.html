@@ -75,6 +75,17 @@
             <p class="fw-bold text-end">Total: $<span id="cartTotal">0.00</span></p>
             <div id="cartMessage" role="status"></div>
             <button type="button" id="sendCartBtn" class="btn btn-dark">Send Cart to API</button>
+            <!-- Shows the JSON that was sent and what the REST API sent back -->
+            <div id="apiLog" class="row mt-3 d-none">
+              <div class="col-md-6">
+                <h3 class="h6">JSON sent (POST)</h3>
+                <pre id="apiRequest" class="bg-white border p-3 rounded small" style="max-height: 300px; overflow-y: auto;"></pre>
+              </div>
+              <div class="col-md-6">
+                <h3 class="h6">API response</h3>
+                <pre id="apiResponse" class="bg-white border p-3 rounded small" style="max-height: 300px; overflow-y: auto;"></pre>
+              </div>
+            </div>
           </div>
         </section>
         <!-- Section-->
@@ -312,79 +323,185 @@
 
         <!-- Core theme JS-->
         <script>
-                const defaultProducts = [
-                    {
-                        productId: "SHOE001",
-                        productName: "New Balance 9060",
-                        shoeType: "Casual",
-                        shoeSize: 10,
-                        unit: "Pair",
-                        price: 160,
-                        weight: ""
-                    },
-                    {
-                        productId: "SHOE002",
-                        productName: "Nike Running Sneakers",
-                        shoeType: "Running",
-                        shoeSize: 10,
-                        unit: "Pair",
-                        price: 80,
-                        weight: ""
-                    },
-                    {
-                        productId: "SHOE003",
-                        productName: "Boots",
-                        shoeType: "Boots",
-                        shoeSize: 10,
-                        unit: "Pair",
-                        price: 100,
-                        weight: ""
-                    }
-                ];
-                //makes it productData
-                localStorage.setItem(
-                'productData',
-                JSON.stringify(defaultProducts)
-                );
+            // ============================================================
+            //  Product data
+            // ============================================================
+            // One entry per "Add to cart" button on this page (SHOE001-SHOE008).
+            const defaultProducts = [
+                { productId: "SHOE001", productName: "New Balance 9060",      shoeType: "Casual",     shoeSize: 10, unit: "Pair", price: 160, weight: "" },
+                { productId: "SHOE002", productName: "Nike Running Sneakers", shoeType: "Running",    shoeSize: 10, unit: "Pair", price: 80,  weight: "" },
+                { productId: "SHOE003", productName: "Boots",                 shoeType: "Boots",      shoeSize: 10, unit: "Pair", price: 100, weight: "" },
+                { productId: "SHOE004", productName: "On Cloud Sneakers",     shoeType: "Running",    shoeSize: 10, unit: "Pair", price: 170, weight: "" },
+                { productId: "SHOE005", productName: "Dress Shoes",           shoeType: "Dress",      shoeSize: 10, unit: "Pair", price: 50,  weight: "" },
+                { productId: "SHOE006", productName: "UGG Tasman Slippers",   shoeType: "Casual",     shoeSize: 9,  unit: "Pair", price: 130, weight: "" },
+                { productId: "SHOE007", productName: "Flip Flops",            shoeType: "Casual",     shoeSize: 10, unit: "Pair", price: 39,  weight: "" },
+                { productId: "SHOE008", productName: "Basketball Sneakers",   shoeType: "Basketball", shoeSize: 11, unit: "Pair", price: 135, weight: "" }
+            ];
 
-                
-             document.querySelectorAll('.add-to-cart').forEach(button => {
-                button.addEventListener('click', function() {
+            // Add any missing default products to productData instead of
+            // overwriting it, so products added on the Add Product page are kept.
+            let productData = [];
+            try {
+                productData = JSON.parse(localStorage.getItem('productData')) || [];
+            } catch (e) {
+                productData = [];
+            }
+            defaultProducts.forEach(function (d) {
+                if (!productData.some(p => p.productId === d.productId)) {
+                    productData.push(d);
+                }
+            });
+            localStorage.setItem('productData', JSON.stringify(productData));
 
-                    //get id
+            // ============================================================
+            //  Cart helpers (cart is stored in localStorage as 'shoppingCart')
+            // ============================================================
+            function getCart() {
+                try {
+                    return JSON.parse(localStorage.getItem('shoppingCart')) || [];
+                } catch (e) {
+                    return [];
+                }
+            }
+
+            function saveCart(cart) {
+                localStorage.setItem('shoppingCart', JSON.stringify(cart));
+            }
+
+            function cartTotal(cart) {
+                return cart.reduce((sum, item) => sum + Number(item.price || 0), 0);
+            }
+
+            function showMessage(type, text) {
+                // type is a Bootstrap alert color: success, danger, warning, info
+                $('#cartMessage')
+                    .attr('class', 'alert alert-' + type + ' mt-2')
+                    .text(text);
+            }
+
+            // Draws the cart table, total, cart badge, and enables/disables the send button
+            function renderCart() {
+                const cart = getCart();
+                const $tbody = $('#cartTable tbody').empty();
+
+                if (cart.length === 0) {
+                    $tbody.append('<tr><td colspan="7" class="text-center text-muted">Your cart is empty.</td></tr>');
+                }
+
+                cart.forEach(function (item, index) {
+                    const $row = $('<tr>');
+                    $row.append($('<td>').text(item.productId));
+                    $row.append($('<td>').text(item.productName));
+                    $row.append($('<td>').text(item.shoeType));
+                    $row.append($('<td>').text(item.shoeSize));
+                    $row.append($('<td>').text(item.unit));
+                    $row.append($('<td>').text('$' + Number(item.price).toFixed(2)));
+                    $row.append($('<td>').append(
+                        $('<button type="button" class="btn btn-sm btn-outline-danger remove-item">Remove</button>')
+                            .attr('data-index', index)
+                    ));
+                    $tbody.append($row);
+                });
+
+                $('#cartTotal').text(cartTotal(cart).toFixed(2));
+                $('#cartCount').text(cart.length);
+                $('#sendCartBtn').prop('disabled', cart.length === 0);
+            }
+
+            // ============================================================
+            //  Add to cart
+            // ============================================================
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', function () {
                     const productId = this.dataset.id;
+                    const products = JSON.parse(localStorage.getItem('productData') || '[]');
+                    const product = products.find(p => p.productId === productId);
 
-                    //get itemData
-                    const products = JSON.parse(
-                        localStorage.getItem('productData') || '[]'
-                    );
-
-                    //find which product has that id
-                    const product = products.find(
-                        p => p.productId === productId
-                    );
-                    //display that its not there
                     if (!product) {
                         alert("Product not found!");
                         return;
                     }
 
-                    //get the current cart list from localStorage
-                    const cart = JSON.parse(
-                        localStorage.getItem('shoppingCart') || '[]'
-                    );
-
-                    //add to cart array
+                    const cart = getCart();
                     cart.push(product);
-
-                    localStorage.setItem(
-                        'shoppingCart',
-                        JSON.stringify(cart)
-                    );
+                    saveCart(cart);
+                    renderCart();
 
                     alert(product.productName + " added to cart!");
                 });
             });
+
+            // Remove one item from the cart
+            $('#cartTable').on('click', '.remove-item', function () {
+                const cart = getCart();
+                cart.splice(Number($(this).attr('data-index')), 1);
+                saveCart(cart);
+                renderCart();
+            });
+
+            // ============================================================
+            //  AJAX: send the cart (JSON document collection) to a RESTful API
+            // ============================================================
+            // Test REST API. JSONPlaceholder accepts a POST, echoes the JSON
+            // back, and adds an "id" (it does not actually save anything).
+            const API_URL = 'https://jsonplaceholder.typicode.com/posts';
+
+            $('#sendCartBtn').on('click', function () {
+                const cart = getCart();
+
+                if (cart.length === 0) {
+                    showMessage('warning', 'Your cart is empty. Add a shoe before sending.');
+                    return;
+                }
+
+                // 1. Prepare the data: wrap the cart items in one order document
+                const order = {
+                    orderId: 'ORD-' + Date.now(),
+                    orderDate: new Date().toISOString(),
+                    itemCount: cart.length,
+                    orderTotal: Number(cartTotal(cart).toFixed(2)),
+                    items: cart
+                };
+
+                const $btn = $(this);
+                $btn.prop('disabled', true).text('Sending...');
+                showMessage('info', 'Sending cart to the API...');
+
+                // 2. Send it with AJAX as a JSON POST request
+                $.ajax({
+                    url: API_URL,
+                    type: 'POST',
+                    contentType: 'application/json; charset=UTF-8', // what we send
+                    dataType: 'json',                               // what we expect back
+                    data: JSON.stringify(order),
+                    timeout: 10000
+                })
+                // 3. Success: show the server's response and empty the cart
+                .done(function (response, textStatus, xhr) {
+                    showMessage('success',
+                        'Cart sent! The API responded with status ' + xhr.status +
+                        ' and record id ' + response.id + '.');
+
+                    $('#apiRequest').text(JSON.stringify(order, null, 2));
+                    $('#apiResponse').text(JSON.stringify(response, null, 2));
+                    $('#apiLog').removeClass('d-none');
+
+                    saveCart([]);
+                    renderCart();
+                })
+                // 4. Error: tell the user and keep the cart so they can retry
+                .fail(function (xhr, textStatus) {
+                    const reason = xhr.status ? 'status ' + xhr.status : textStatus;
+                    showMessage('danger', 'Could not send the cart (' + reason + '). Please try again.');
+                })
+                .always(function () {
+                    $btn.text('Send Cart to API');
+                    $btn.prop('disabled', getCart().length === 0);
+                });
+            });
+
+            // Show whatever is already in the cart when the page loads
+            renderCart();
         </script>
 
     </body>
