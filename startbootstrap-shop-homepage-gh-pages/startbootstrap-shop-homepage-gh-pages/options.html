@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <title>Order Options</title>
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+        <link href="css/styles.css" rel="stylesheet" />
+    </head>
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container px-4 px-lg-5">
+                <a class="navbar-brand" href="#!">Title For IST 256</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                        <li class="nav-item"><a class="nav-link" href="homepage.html">Home</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Shop</a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="shop.html">All Products</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><a class="dropdown-item" href="#!">Popular Items</a></li>
+                                <li><a class="dropdown-item" href="addproduct.html">Add a Product</a></li>
+                                <li><a class="dropdown-item active" href="options.html">Order Options</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" href="login.html">Login/Signup</a></li>
+                    </ul>
+                    <a class="btn btn-outline-dark" href="cart.html">
+                        <i class="bi-cart-fill me-1"></i>
+                        Cart
+                        <span class="badge bg-dark text-white ms-1 rounded-pill" id="cartCount">0</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <main class="container py-5" style="max-width: 750px;">
+            <!-- React mounts here -->
+            <div id="root"></div>
+        </main>
+
+        <!-- Libraries -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+
+        <script type="text/babel">
+            const { useState, useEffect } = React;
+
+            const API_URL = 'https://jsonplaceholder.typicode.com/posts';
+
+            const emptyForm = {
+                fullName: '',
+                email: '',
+                product: '',
+                delivery: '',
+                giftWrap: false,
+                notes: ''
+            };
+
+            function validate(values) {
+                const errors = {};
+                if (!values.fullName.trim()) {
+                    errors.fullName = 'Please enter your full name.';
+                }
+                if (!values.email.trim()) {
+                    errors.email = 'Please enter your email address.';
+                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) {
+                    errors.email = 'Please enter a valid email address (like name@example.com).';
+                }
+                if (!values.product) {
+                    errors.product = 'Please choose the shoe this order is for.';
+                }
+                if (!values.delivery) {
+                    errors.delivery = 'Please select a delivery method.';
+                }
+                if (values.notes.length > 200) {
+                    errors.notes = 'Notes must be 200 characters or fewer.';
+                }
+                return errors;
+            }
+
+            function OptionsForm() {
+                // ---------- REACT: state ----------
+                const [values, setValues] = useState(emptyForm);
+                const [errors, setErrors] = useState({});
+                const [submitted, setSubmitted] = useState(false);
+                const [products, setProducts] = useState([]);
+                const [status, setStatus] = useState(null);
+                const [sending, setSending] = useState(false);
+                const [lastJson, setLastJson] = useState(null);
+
+                useEffect(() => {
+                    $.getJSON('products.json')
+                        .done(function (data) {
+                            setProducts(Array.isArray(data) ? data : []);
+                        })
+                        .fail(function () {
+                            // Fallback: products saved by your shop page
+                            try {
+                                const saved = JSON.parse(localStorage.getItem('productData')) || [];
+                                setProducts(Array.isArray(saved) ? saved : []);
+                            } catch (e) {
+                                setProducts([]);
+                            }
+                        });
+                }, []);
+
+                useEffect(() => {
+                    try {
+                        const cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
+                        $('#cartCount').text(cart.length);
+                    } catch (e) { /* ignore */ }
+                }, []);
+
+                function handleChange(event) {
+                    const { name, value, type, checked } = event.target;
+                    const next = { ...values, [name]: type === 'checkbox' ? checked : value };
+                    setValues(next);
+                    if (submitted) setErrors(validate(next));
+                }
+
+                function buildJson() {
+                    return {
+                        customer: {
+                            fullName: values.fullName.trim(),
+                            email: values.email.trim()
+                        },
+                        order: {
+                            productId: values.product,
+                            deliveryMethod: values.delivery,
+                            giftWrap: values.giftWrap,
+                            notes: values.notes.trim()
+                        },
+                        submittedAt: new Date().toISOString()
+                    };
+                }
+
+                function sendToApi(json) {
+                    return $.ajax({
+                        url: API_URL,
+                        method: 'POST',
+                        contentType: 'application/json; charset=UTF-8',
+                        data: JSON.stringify(json),
+                        dataType: 'json'
+                    });
+                }
+
+                function handleSubmit(event) {
+                    event.preventDefault();
+                    setSubmitted(true);
+                    const found = validate(values);
+                    setErrors(found);
+
+                    if (Object.keys(found).length > 0) {
+                        setStatus({ type: 'danger', text: 'Please fix the highlighted fields and try again.' });
+                        return;
+                    }
+
+                    const json = buildJson();
+                    setLastJson(json);
+                    setSending(true);
+                    setStatus(null);
+
+                    sendToApi(json)
+                        .done(function (response) {
+                            setStatus({
+                                type: 'success',
+                                text: 'Options saved! The server returned confirmation ID ' + response.id + '.'
+                            });
+                            setValues(emptyForm);
+                            setErrors({});
+                            setSubmitted(false);
+                        })
+                        .fail(function (xhr) {
+                            setStatus({
+                                type: 'danger',
+                                text: 'Could not reach the server (status ' + xhr.status + '). Please try again.'
+                            });
+                        })
+                        .always(function () {
+                            setSending(false);
+                        });
+                }
+
+                function downloadJson() {
+                    if (!lastJson) return;
+                    const blob = new Blob([JSON.stringify(lastJson, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'orderOptions.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }
+
+                const cls = (field) => 'form-control' + (errors[field] ? ' is-invalid' : '');
+                const selectCls = (field) => 'form-select' + (errors[field] ? ' is-invalid' : '');
+
+                return (
+                    <div className="card shadow-sm">
+                        <div className="card-body p-4">
+                            <h1 className="text-center mb-2">Order Options</h1>
+                            <p className="lead mb-4">Choose how you want your order delivered, then confirm.</p>
+
+                            <form onSubmit={handleSubmit} noValidate>
+                                <div className="mb-3">
+                                    <label htmlFor="fullName" className="form-label">Full Name *</label>
+                                    <input type="text" id="fullName" name="fullName" className={cls('fullName')}
+                                           value={values.fullName} onChange={handleChange} />
+                                    <div className="invalid-feedback">{errors.fullName}</div>
+                                </div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="email" className="form-label">Email Address *</label>
+                                    <input type="email" id="email" name="email" className={cls('email')}
+                                           value={values.email} onChange={handleChange} />
+                                    <div className="invalid-feedback">{errors.email}</div>
+                                </div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="product" className="form-label">Shoe *</label>
+                                    <select id="product" name="product" className={selectCls('product')}
+                                            value={values.product} onChange={handleChange}>
+                                        <option value="">Select a shoe</option>
+                                        {products.map((p) => (
+                                            <option key={p.productId} value={p.productId}>
+                                                {p.productName} ({p.productId})
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="invalid-feedback">{errors.product}</div>
+                                </div>
+
+                                <fieldset className="mb-3">
+                                    <legend className="form-label fs-6">Delivery Method *</legend>
+                                    {['Standard', 'Express', 'Store Pickup'].map((option) => (
+                                        <div className="form-check" key={option}>
+                                            <input className={'form-check-input' + (errors.delivery ? ' is-invalid' : '')}
+                                                   type="radio" name="delivery" id={'delivery' + option.replace(' ', '')}
+                                                   value={option} checked={values.delivery === option}
+                                                   onChange={handleChange} />
+                                            <label className="form-check-label" htmlFor={'delivery' + option.replace(' ', '')}>
+                                                {option}
+                                            </label>
+                                        </div>
+                                    ))}
+                                    {errors.delivery && <div className="text-danger small mt-1">{errors.delivery}</div>}
+                                </fieldset>
+
+                                <div className="form-check mb-3">
+                                    <input className="form-check-input" type="checkbox" id="giftWrap" name="giftWrap"
+                                           checked={values.giftWrap} onChange={handleChange} />
+                                    <label className="form-check-label" htmlFor="giftWrap">Gift wrap this order</label>
+                                </div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="notes" className="form-label">Notes (optional)</label>
+                                    <textarea id="notes" name="notes" rows="3" className={cls('notes')}
+                                              value={values.notes} onChange={handleChange}
+                                              placeholder="Delivery instructions, gift message, etc."></textarea>
+                                    <div className="form-text">{values.notes.length}/200 characters</div>
+                                    <div className="invalid-feedback">{errors.notes}</div>
+                                </div>
+
+                                <button type="submit" className="btn btn-dark w-100" disabled={sending}>
+                                    {sending ? 'Sending...' : 'Confirm Options'}
+                                </button>
+                            </form>
+
+                            {status && (
+                                <div className={'alert alert-' + status.type + ' mt-3'} role="status">
+                                    {status.text}
+                                </div>
+                            )}
+
+                            <hr className="my-4" />
+                            <h2 className="h5">JSON Data</h2>
+                            <pre className="bg-light p-3 rounded" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                {lastJson ? JSON.stringify(lastJson, null, 2) : '{}'}
+                            </pre>
+                            <button type="button" className="btn btn-outline-dark w-100 mt-2"
+                                    onClick={downloadJson} disabled={!lastJson}>
+                                Download JSON
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            ReactDOM.createRoot(document.getElementById('root')).render(<OptionsForm />);
+        </script>
+    </body>
+</html>
