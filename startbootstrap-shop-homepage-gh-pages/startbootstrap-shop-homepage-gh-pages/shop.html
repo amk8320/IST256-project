@@ -328,31 +328,35 @@
             //  Product data
             // ============================================================
             // One entry per "Add to cart" button on this page (SHOE001-SHOE008).
-            const defaultProducts = [
-                { productId: "SHOE001", productName: "New Balance 9060",      shoeType: "Casual",     shoeSize: 10, unit: "Pair", price: 160, weight: "" },
-                { productId: "SHOE002", productName: "Nike Running Sneakers", shoeType: "Running",    shoeSize: 10, unit: "Pair", price: 80,  weight: "" },
-                { productId: "SHOE003", productName: "Boots",                 shoeType: "Boots",      shoeSize: 10, unit: "Pair", price: 100, weight: "" },
-                { productId: "SHOE004", productName: "On Cloud Sneakers",     shoeType: "Running",    shoeSize: 10, unit: "Pair", price: 170, weight: "" },
-                { productId: "SHOE005", productName: "Dress Shoes",           shoeType: "Dress",      shoeSize: 10, unit: "Pair", price: 50,  weight: "" },
-                { productId: "SHOE006", productName: "UGG Tasman Slippers",   shoeType: "Casual",     shoeSize: 9,  unit: "Pair", price: 130, weight: "" },
-                { productId: "SHOE007", productName: "Flip Flops",            shoeType: "Casual",     shoeSize: 10, unit: "Pair", price: 39,  weight: "" },
-                { productId: "SHOE008", productName: "Basketball Sneakers",   shoeType: "Basketball", shoeSize: 11, unit: "Pair", price: 135, weight: "" }
-            ];
-
-            // Add any missing default products to productData instead of
-            // overwriting it, so products added on the Add Product page are kept.
-            let productData = [];
+        async function loadProductData() {
             try {
-                productData = JSON.parse(localStorage.getItem('productData')) || [];
-            } catch (e) {
-                productData = [];
-            }
-            defaultProducts.forEach(function (d) {
-                if (!productData.some(p => p.productId === d.productId)) {
-                    productData.push(d);
+                const response = await fetch('products.json');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
-            });
-            localStorage.setItem('productData', JSON.stringify(productData));
+                const defaultProducts = await response.json();
+                let savedProducts = [];
+                try{
+                    savedProducts = JSON.parse(localStorage.getItem('productData')) || [];
+                } catch (e) {
+                    savedProducts = [];
+                }
+
+                const productData = [...defaultProducts];
+                
+                savedProducts.forEach(savedProduct => {
+                    const alreadyExists = productData.some(p => p.productId === product.productId);
+                    if (!alreadyExists) {
+                        productData.push(savedProduct);
+                    }
+                });
+                localStorage.setItem('productData', JSON.stringify(productData));
+
+            }catch (error) {
+                console.error('Error loading product data:', error);
+            }
+        }
+            loadProductData();
 
             const searchBox = document.getElementById('searchBox');
             const searchResults = document.getElementById('searchResults');
@@ -494,6 +498,21 @@
                     alert(product.productName + " added to cart!");
                 });
             });
+            $('#searchResults').on('click', '.search-add-to-cart', function (){
+                const productId = $(this).data('id');
+                const products = JSON.parse(localStorage.getItem('productData') || '[]');
+                const product = products.find(p => p.productId === productId);
+                
+                if (!product) {
+                    alert("Product not found!");
+                    return;
+                }
+                const cart = getCart();
+                cart.push(product);
+                saveCart(cart);
+                renderCart();
+                alert(product.productName + " added to cart!");
+            })
 
             // Remove one item from the cart
             $('#cartTable').on('click', '.remove-item', function () {

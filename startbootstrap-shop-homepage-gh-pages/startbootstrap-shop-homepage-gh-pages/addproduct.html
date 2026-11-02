@@ -191,8 +191,75 @@
                 }
             });
         }
+        
+        productTableBody.addEventListener('click', function(event) {
+            if (event.target.classList.contains('delete-btn')) {
+                const index = Number(event.target.dataset.index);
+                const product = products[index];
+
+                if (!product) return;
+
+                if (confirm(`Are you sure you want to delete "${product.productName}"?`)) {
+                    products.splice(index, 1);
+
+                    localStorage.setItem(
+                        'productData',
+                        JSON.stringify(products)
+                    );
+
+                    displayProducts();
+
+                    message.textContent = 'Product deleted successfully!';
+                    message.className = 'mt-3 text-success';
+                }
+            }
+        });
+
+        // Search functionality
         searchBox.addEventListener('input', displayProducts);
-        displayProducts();
+
+        // Load products from JSON
+        async function loadProducts() {
+            try {
+                const response = await fetch('products.json');
+
+                if (!response.ok) {
+                    throw new Error('Unable to load products.json');
+                }
+
+                const defaultProducts = await response.json();
+                const savedProducts = products;
+
+                products = [...defaultProducts];
+
+                savedProducts.forEach(savedProduct => {
+                    const existingIndex = products.findIndex(
+                        p => p.productId === savedProduct.productId
+                    );
+
+                    // Only add products that aren't already present
+                    if (existingIndex === -1) {
+                        products.push(savedProduct);
+                    }
+                });
+
+                localStorage.setItem(
+                    'productData',
+                    JSON.stringify(products)
+                );
+
+                displayProducts();
+
+                console.log('Products loaded successfully');
+
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        loadProducts();
+
+    
 
 
         form.addEventListener('submit', function(event) {

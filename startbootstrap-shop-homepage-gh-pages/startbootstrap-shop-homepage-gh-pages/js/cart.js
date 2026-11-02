@@ -71,6 +71,13 @@ document.addEventListener("DOMContentLoaded", function () {
         cartCount.textContent = cart.length;
         checkoutButton.disabled = cart.length === 0;
     }
-
+    checkoutButton.addEventListener("click", function () {
+        if (cart.length > 0) {
+            window.location.href = "options.html";
+        }
+        else{
+            alert("Your cart is empty. Please add items before checking out.");
+        }
+    });
     displayCart();
 });
