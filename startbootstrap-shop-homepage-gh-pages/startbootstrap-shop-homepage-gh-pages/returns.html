@@ -26,7 +26,7 @@
                                 <li><a class="dropdown-item" href="addproduct.html">Add a Product</a></li>
                                 <li><a class="dropdown-item" href="options.html">Order Options</a></li>
                                 <li><a class="dropdown-item" href="billing.html">Billing Details</a></li>
-                                <li><a class="dropdown-item" href="returns.html">Returns</a></li>
+                                <li><a class="dropdown-item active" href="returns.html">Returns</a></li>
                             </ul>
                         </li>
                         <li class="nav-item"><a class="nav-link" href="login.html">Login/Signup</a></li>
@@ -45,127 +45,101 @@
             <p class="lead text-center mb-4">Tell us what you want to return.</p>
 
             <div class="row g-4">
-                <!-- Billing form -->
-                <div class="col-lg-7">
+
+                <!-- LEFT: search + product list -->
+                <div class="col-lg-6">
                     <div class="card shadow-sm">
                         <div class="card-body p-4">
-                            <form id="billing-form" ng-submit="submitBilling()" novalidate>
-
-                                <div class="mb-3">
-                                    <label for="fullName" class="form-label">Full Name *</label>
-                                    <input type="text" id="fullName" class="form-control"
-                                           ng-model="form.fullName" ng-change="revalidate()"
-                                           ng-class="{'is-invalid': errors.fullName}">
-                                    <div class="invalid-feedback">{{ errors.fullName }}</div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="address" class="form-label">Address *</label>
-                                    <input type="text" id="address" class="form-control"
-                                           placeholder="Street, city, state, ZIP"
-                                           ng-model="form.address" ng-change="revalidate()"
-                                           ng-class="{'is-invalid': errors.address}">
-                                    <div class="invalid-feedback">{{ errors.address }}</div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="shipping" class="form-label">Shipping Method *</label>
-                                    <select id="shipping" class="form-select"
-                                            ng-model="form.shipping"
-                                            ng-options="s.name + ' ($' + (s.cost | number:2) + ')' for s in shippingOptions"
-                                            ng-change="revalidate()"
-                                            ng-class="{'is-invalid': errors.shipping}">
-                                        <option value="">Select a shipping method</option>
-                                    </select>
-                                    <div class="invalid-feedback">{{ errors.shipping }}</div>
-                                </div>
-
-                                <hr>
-                                <h2 class="h5 mb-3">Payment</h2>
-
-                                <div class="mb-3">
-                                    <label for="cardNumber" class="form-label">Credit Card Number *</label>
-                                    <input type="text" id="cardNumber" class="form-control" inputmode="numeric"
-                                           placeholder="4111 1111 1111 1111" maxlength="19" autocomplete="off"
-                                           ng-model="form.cardNumber" ng-change="formatCard()"
-                                           ng-class="{'is-invalid': errors.cardNumber}">
-                                    <div class="invalid-feedback">{{ errors.cardNumber }}</div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-6 mb-3">
-                                        <label for="expiry" class="form-label">Expiration (MM/YY) *</label>
-                                        <input type="text" id="expiry" class="form-control"
-                                               placeholder="MM/YY" maxlength="5" autocomplete="off"
-                                               ng-model="form.expiry" ng-change="formatExpiry()"
-                                               ng-class="{'is-invalid': errors.expiry}">
-                                        <div class="invalid-feedback">{{ errors.expiry }}</div>
+                            <h2 class="h5 mb-3">1. Find your product</h2>
+                            <input type="search" id="productSearch" class="form-control mb-3"
+                                   placeholder="Search by name or type">
+                            <ul class="list-group list-group-flush" id="productList">
+                                <li class="list-group-item d-flex align-items-center gap-3 px-0 product-row"
+                                    ng-repeat="p in catalog">
+                                    <img ng-src="{{ p.image }}" alt="{{ p.productName }}" width="64" height="64">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold">{{ p.productName }}</div>
+                                        <small class="text-muted">{{ p.shoeType }} &middot; Size {{ p.shoeSize }}</small><br>
+                                        <span>{{ p.price | currency }}</span>
                                     </div>
-                                    <div class="col-6 mb-3">
-                                        <label for="cvv" class="form-label">Security Code *</label>
-                                        <input type="password" id="cvv" class="form-control" inputmode="numeric"
-                                               maxlength="4" autocomplete="off"
-                                               ng-model="form.cvv" ng-change="revalidate()"
-                                               ng-class="{'is-invalid': errors.cvv}">
-                                        <div class="invalid-feedback">{{ errors.cvv }}</div>
-                                    </div>
-                                </div>
-
-                                <button type="submit" class="btn btn-dark w-100" ng-disabled="sending">
-                                    {{ sending ? 'Sending...' : 'Place Order' }}
-                                </button>
-                            </form>
-
-                            <div class="alert mt-3" ng-class="'alert-' + status.type" ng-if="status" role="status">
-                                {{ status.text }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Order summary -->
-                <div class="col-lg-5">
-                    <div class="card shadow-sm">
-                        <div class="card-body p-4">
-                            <h2 class="h5 mb-3">Order Summary</h2>
-
-                            <p class="text-muted" ng-if="cart.length === 0">
-                                Your cart is empty. <a href="shop.html">Shop for shoes</a> first.
-                            </p>
-
-                            <ul class="list-group list-group-flush mb-3" ng-if="cart.length > 0">
-                                <li class="list-group-item d-flex justify-content-between px-0"
-                                    ng-repeat="item in cart track by $index">
-                                    <span>{{ item.productName }}<br><small class="text-muted">Size {{ item.shoeSize }}</small></span>
-                                    <span>{{ item.price | currency }}</span>
+                                    <button type="button" class="btn btn-dark btn-sm" ng-click="toggle(p)">Return</button>
                                 </li>
                             </ul>
-
-                            <div class="d-flex justify-content-between">
-                                <span>Items ({{ cart.length }})</span><span>{{ subtotal() | currency }}</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span>Shipping<span ng-if="form.shipping"> ({{ form.shipping.name }})</span></span>
-                                <span>{{ shippingCost() | currency }}</span>
-                            </div>
-                            <hr>
-                            <div class="d-flex justify-content-between fw-bold">
-                                <span>Total</span><span>{{ total() | currency }}</span>
-                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- RIGHT: return form goes here next -->
+                <div class="col-lg-6">
+                    <div class="card shadow-sm">
+    <div class="card-body p-4">
+        <h2 class="h5 mb-3">2. Return details</h2>
+        <form ng-submit="submitReturn()" novalidate>
+
+            <div class="mb-3">
+                <label for="fullName" class="form-label">Full Name *</label>
+                <input type="text" id="fullName" class="form-control"
+                       ng-model="form.fullName" ng-change="revalidate()"
+                       ng-class="{'is-invalid': errors.fullName}">
+                <div class="invalid-feedback">{{ errors.fullName }}</div>
             </div>
 
-            <!-- JSON that gets sent -->
-            <div class="card shadow-sm mt-4">
-                <div class="card-body p-4">
-                    <h2 class="h5">JSON Data Sent to Server</h2>
-                    <pre class="bg-light p-3 rounded" style="max-height: 300px; overflow-y: auto;">{{ lastJson ? (lastJson | json) : '{}' }}</pre>
-                    <h2 class="h5 mt-3">Server Response</h2>
-                    <pre class="bg-light p-3 rounded">{{ lastResponse ? (lastResponse | json) : '{}' }}</pre>
-                </div>
+            <div class="mb-3">
+                <label for="orderId" class="form-label">Order ID *</label>
+                <input type="text" id="orderId" class="form-control"
+                       ng-model="form.orderId" ng-change="revalidate()"
+                       ng-class="{'is-invalid': errors.orderId}">
+                <div class="invalid-feedback">{{ errors.orderId }}</div>
             </div>
+
+            <div class="alert alert-danger py-2" ng-if="errors.items">{{ errors.items }}</div>
+
+            <div class="border rounded p-3 mb-3" ng-repeat="it in selected">
+                <strong>{{ it.productName }}</strong> &mdash; {{ it.price | currency }}
+
+                <label class="form-label mt-2 mb-1">Reason for return *</label>
+                <select class="form-select" ng-model="it.reason"
+                        ng-options="r for r in reasons" ng-change="revalidate()"
+                        ng-class="{'is-invalid': errors['reason' + $index]}">
+                    <option value="">Select a reason</option>
+                </select>
+                <div class="invalid-feedback">{{ errors['reason' + $index] }}</div>
+
+                <label class="form-label mt-2 mb-1">Product condition *</label>
+                <select class="form-select" ng-model="it.condition"
+                        ng-options="c for c in conditions" ng-change="revalidate()"
+                        ng-class="{'is-invalid': errors['condition' + $index]}">
+                    <option value="">Select a condition</option>
+                </select>
+                <div class="invalid-feedback">{{ errors['condition' + $index] }}</div>
+
+                <label class="form-label mt-2 mb-1">Comments (optional)</label>
+                <textarea class="form-control" rows="2" ng-model="it.comments"></textarea>
+            </div>
+
+            <div class="d-flex justify-content-between fw-bold mb-3">
+                <span>Refund total</span>
+                <span>{{ refundTotal() | currency }}</span>
+            </div>
+
+            <button type="submit" class="btn btn-dark w-100">Submit Return</button>
+        </form>
+
+        <div class="alert mt-3" ng-class="'alert-' + status.type" ng-if="status">{{ status.text }}</div>
+    </div>
+</div>
+                </div>
+
+            </div>
+
+<div class="card shadow-sm mt-4">
+    <div class="card-body p-4">
+        <h2 class="h5">JSON Data Sent to Server</h2>
+        <pre class="bg-light p-3 rounded">{{ lastJson ? (lastJson | json) : '{}' }}</pre>
+        <h2 class="h5 mt-3">Server Response</h2>
+        <pre class="bg-light p-3 rounded">{{ lastResponse ? (lastResponse | json) : '{}' }}</pre>
+    </div>
+</div>
         </main>
 
         <footer class="py-5 bg-dark">
@@ -173,166 +147,140 @@
         </footer>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js"></script>
-        <script>
 
-            //  AngularJS app: binds the form, validates, sends JSON
+<script>
+    const API_URL = 'http://localhost:3000/api/returns';
 
-            const API_URL = 'http://localhost:3000/api/billing';
+    angular.module('returnsApp', [])
+    .controller('ReturnsController', ['$scope', '$http', function ($scope, $http) {
 
-            angular.module('billingApp', [])
-            .controller('BillingController', ['$scope', '$http', function ($scope, $http) {
+        // ---------- State ----------
+        $scope.reasons = ['Wrong size', 'Defective / damaged', 'Not as described', 'Changed my mind', 'Other'];
+        $scope.conditions = ['Unworn', 'Lightly worn', 'Worn', 'Damaged'];
+        $scope.catalog = [];
+        $scope.selected = [];
+        $scope.form = { fullName: '', orderId: '' };
+        $scope.errors = {};
+        $scope.attempted = false;
+        $scope.status = null;
+        $scope.lastJson = null;
+        $scope.lastResponse = null;
 
-                // ---------- State ----------
-                $scope.shippingOptions = [
-                    { name: 'Standard (5-7 days)', cost: 5.99 },
-                    { name: 'Express (2 days)',    cost: 14.99 },
-                    { name: 'Store Pickup',         cost: 0 }
-                ];
-                $scope.form = { fullName: '', address: '', shipping: null, cardNumber: '', expiry: '', cvv: '' };
-                $scope.errors = {};
-                $scope.attempted = false;
-                $scope.sending = false;
-                $scope.status = null;
-                $scope.lastJson = null;
-                $scope.lastResponse = null;
+        // ---------- AJAX GET: load products from the JSON document ----------
+        $http.get('products.json').then(function (res) {
+            $scope.catalog = res.data;
+        });
 
-                // Cart comes from localStorage (filled by shop.html)
-                function loadCart() {
-                    try {
-                        const c = JSON.parse(localStorage.getItem('shoppingCart')) || [];
-                        return Array.isArray(c) ? c : [];
-                    } catch (e) { return []; }
-                }
-                $scope.cart = loadCart();
-                document.getElementById('cartCount').textContent = $scope.cart.length;
+        // ---------- Pick / unpick a product ----------
+        $scope.toggle = function (p) {
+            const index = $scope.selected.findIndex(s => s.productId === p.productId);
+            if (index >= 0) {
+                $scope.selected.splice(index, 1);
+            } else {
+                $scope.selected.push({
+                    productId: p.productId,
+                    productName: p.productName,
+                    price: Number(p.price),
+                    reason: '',
+                    condition: '',
+                    comments: ''
+                });
+            }
+            $scope.revalidate();
+        };
 
-                // ---------- Order math ----------
-                $scope.subtotal = function () {
-                    return $scope.cart.reduce((sum, i) => sum + Number(i.price || 0), 0);
-                };
-                $scope.shippingCost = function () {
-                    return $scope.form.shipping ? $scope.form.shipping.cost : 0;
-                };
-                $scope.total = function () {
-                    return $scope.subtotal() + $scope.shippingCost();
-                };
+        // ---------- Refund total ----------
+        $scope.refundTotal = function () {
+            return $scope.selected.reduce((sum, i) => sum + i.price, 0);
+        };
 
-                // ---------- Input formatting ----------
-                $scope.formatCard = function () {
-                    const digits = ($scope.form.cardNumber || '').replace(/\D/g, '').slice(0, 16);
-                    $scope.form.cardNumber = digits.replace(/(.{4})/g, '$1 ').trim();
-                    $scope.revalidate();
-                };
-                $scope.formatExpiry = function () {
-                    let d = ($scope.form.expiry || '').replace(/\D/g, '').slice(0, 4);
-                    if (d.length > 2) d = d.slice(0, 2) + '/' + d.slice(2);
-                    $scope.form.expiry = d;
-                    $scope.revalidate();
-                };
+        // ---------- Validation ----------
+        function validate() {
+            const e = {};
+            if (!$scope.form.fullName || $scope.form.fullName.trim().length < 2) {
+                e.fullName = 'Please enter your full name.';
+            }
+            if (!$scope.form.orderId || $scope.form.orderId.trim().length < 3) {
+                e.orderId = 'Please enter your order ID.';
+            }
+            if ($scope.selected.length === 0) {
+                e.items = 'Select at least one product to return.';
+            }
+            $scope.selected.forEach(function (it, i) {
+                if (!it.reason) e['reason' + i] = 'Please choose a reason.';
+                if (!it.condition) e['condition' + i] = 'Please choose the product condition.';
+            });
+            return e;
+        }
 
-                // ---------- Validation ----------
-                function luhnOk(num) {
-                    let sum = 0, alt = false;
-                    for (let i = num.length - 1; i >= 0; i--) {
-                        let n = parseInt(num[i], 10);
-                        if (alt) { n *= 2; if (n > 9) n -= 9; }
-                        sum += n;
-                        alt = !alt;
-                    }
-                    return sum % 10 === 0;
-                }
+        $scope.revalidate = function () {
+            if ($scope.attempted) $scope.errors = validate();
+        };
 
-                function validate(f) {
-                    const e = {};
-                    if (!f.fullName || !f.fullName.trim()) e.fullName = 'Please enter your full name.';
-                    if (!f.address || f.address.trim().length < 8) e.address = 'Please enter your full address.';
-                    if (!f.shipping) e.shipping = 'Please select a shipping method.';
+        // ---------- JSON document ----------
+        function buildJson() {
+            return {
+                customer: {
+                    fullName: $scope.form.fullName.trim(),
+                    orderId: $scope.form.orderId.trim()
+                },
+                items: $scope.selected.map(i => ({
+                    productId: i.productId,
+                    productName: i.productName,
+                    price: i.price,
+                    reason: i.reason,
+                    condition: i.condition,
+                    comments: (i.comments || '').trim()
+                })),
+                refundTotal: $scope.refundTotal(),
+                submittedAt: new Date().toISOString()
+            };
+        }
 
-                    const card = (f.cardNumber || '').replace(/\s/g, '');
-                    if (!/^\d{16}$/.test(card)) e.cardNumber = 'Card number must be 16 digits.';
-                    else if (!luhnOk(card)) e.cardNumber = 'That card number is not valid.';
+        // ---------- AJAX POST to Node ----------
+        $scope.submitReturn = function () {
+            $scope.attempted = true;
+            $scope.errors = validate();
 
-                    const m = /^(\d{2})\/(\d{2})$/.exec(f.expiry || '');
-                    if (!m) {
-                        e.expiry = 'Use the format MM/YY.';
-                    } else {
-                        const month = Number(m[1]), year = 2000 + Number(m[2]);
-                        const now = new Date();
-                        if (month < 1 || month > 12) e.expiry = 'Month must be 01-12.';
-                        else if (year < now.getFullYear() ||
-                                (year === now.getFullYear() && month < now.getMonth() + 1)) e.expiry = 'This card has expired.';
-                    }
+            if (Object.keys($scope.errors).length > 0) {
+                $scope.status = { type: 'danger', text: 'Please fix the highlighted fields and try again.' };
+                return;   // stops here, so nothing is sent
+            }
 
-                    if (!/^\d{3,4}$/.test(f.cvv || '')) e.cvv = 'Security code must be 3 or 4 digits.';
-                    return e;
-                }
+            const json = buildJson();
+            $scope.lastJson = json;
 
-                // Re-check live, but only after the first submit attempt
-                $scope.revalidate = function () {
-                    if ($scope.attempted) $scope.errors = validate($scope.form);
-                };
+            $http.post(API_URL, json)
+                .then(function (res) {
+                    $scope.lastResponse = res.data;
+                    $scope.status = { type: 'success', text: 'Return submitted! ID: ' + res.data.id };
+                    $scope.selected = [];
+                    $scope.form = { fullName: '', orderId: '' };
+                    $scope.errors = {};
+                    $scope.attempted = false;
+                })
+                .catch(function (err) {
+                    $scope.lastResponse = err.data || { error: 'No response' };
+                    $scope.status = { type: 'danger', text: 'Could not send the return. Is the server running?' };
+                });
+        };
+    }]);
+</script>
 
-                // ---------- JSON document ----------
-                // NOTE: the full card number and CVV are NOT stored; only the last 4 digits.
-                function buildJson() {
-                    const f = $scope.form;
-                    const card = f.cardNumber.replace(/\s/g, '');
-                    return {
-                        customer: { fullName: f.fullName.trim(), address: f.address.trim() },
-                        payment: { method: 'Credit Card', cardLast4: card.slice(-4), expiry: f.expiry },
-                        order: {
-                            items: $scope.cart.map(i => ({ productId: i.productId, productName: i.productName, price: Number(i.price) })),
-                            itemCount: $scope.cart.length,
-                            subtotal: Number($scope.subtotal().toFixed(2)),
-                            shipping: { method: f.shipping.name, cost: f.shipping.cost },
-                            total: Number($scope.total().toFixed(2))
-                        },
-                        submittedAt: new Date().toISOString()
-                    };
-                }
+<script>
+    // jQuery: live search that shows/hides product rows as you type
+    $(function () {
+        $('#productSearch').on('input', function () {
+            const q = $(this).val().toLowerCase().trim();
 
-                // Submit (AJAX POST to Node)
-                $scope.submitBilling = function () {
-                    $scope.attempted = true;
-                    $scope.errors = validate($scope.form);
-
-                    if (Object.keys($scope.errors).length > 0) {
-                        $scope.status = { type: 'danger', text: 'Please fix the highlighted fields and try again.' };
-                        return; // blocks submission
-                    }
-                    if ($scope.cart.length === 0) {
-                        $scope.status = { type: 'warning', text: 'Your cart is empty. Add a shoe before checking out.' };
-                        return;
-                    }
-
-                    const json = buildJson();
-                    $scope.lastJson = json;
-                    $scope.sending = true;
-                    $scope.status = null;
-
-                    // $http sends an AJAX (XMLHttpRequest) POST with a JSON body
-                    $http.post(API_URL, json)
-                        .then(function (res) {
-                            $scope.lastResponse = res.data;
-                            $scope.status = { type: 'success', text: 'Order placed! Confirmation ID: ' + res.data.id };
-                            localStorage.setItem('shoppingCart', '[]');
-                            $scope.cart = [];
-                            document.getElementById('cartCount').textContent = 0;
-                            $scope.form = { fullName: '', address: '', shipping: null, cardNumber: '', expiry: '', cvv: '' };
-                            $scope.errors = {};
-                            $scope.attempted = false;
-                        })
-                        .catch(function (err) {
-                            $scope.lastResponse = err.data || { error: 'No response' };
-                            $scope.status = {
-                                type: 'danger',
-                                text: 'Could not reach the server (status ' + err.status + '). Is "node server.js" running?'
-                            };
-                        })
-                        .finally(function () { $scope.sending = false; });
-                };
-            }]);
-        </script>
+            $('.product-row').each(function () {
+                const rowText = $(this).text().toLowerCase();
+                $(this).toggle(rowText.indexOf(q) !== -1);
+            });
+        });
+    });
+</script>
     </body>
 </html>
