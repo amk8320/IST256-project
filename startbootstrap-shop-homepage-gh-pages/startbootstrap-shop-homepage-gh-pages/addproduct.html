@@ -13,7 +13,7 @@
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             
             <div class="container px-4 px-lg-5">
-                <a class="navbar-brand" href="#!">Title For IST 256
+                <a class="navbar-brand" href="#!">Penn State Shoe Central
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                 
@@ -27,6 +27,7 @@
                                 <li><hr class="dropdown-divider" /></li>
                                 <li><a class="dropdown-item" href="#!">Popular Items</a></li>
                                 <li><a class="dropdown-item" href="addproduct.html">Add a Product</a></li>
+                                <li><a class="dropdown-item" href="options.html">Order Options</a></li>
                             </ul>
                         </li>
                         <li class="nav-item"><a class="nav-link" href="login.html">Login/Signup</a></li>
@@ -190,8 +191,75 @@
                 }
             });
         }
+        
+        productTableBody.addEventListener('click', function(event) {
+            if (event.target.classList.contains('delete-btn')) {
+                const index = Number(event.target.dataset.index);
+                const product = products[index];
+
+                if (!product) return;
+
+                if (confirm(`Are you sure you want to delete "${product.productName}"?`)) {
+                    products.splice(index, 1);
+
+                    localStorage.setItem(
+                        'productData',
+                        JSON.stringify(products)
+                    );
+
+                    displayProducts();
+
+                    message.textContent = 'Product deleted successfully!';
+                    message.className = 'mt-3 text-success';
+                }
+            }
+        });
+
+        // Search functionality
         searchBox.addEventListener('input', displayProducts);
-        displayProducts();
+
+        // Load products from JSON
+        async function loadProducts() {
+            try {
+                const response = await fetch('products.json');
+
+                if (!response.ok) {
+                    throw new Error('Unable to load products.json');
+                }
+
+                const defaultProducts = await response.json();
+                const savedProducts = products;
+
+                products = [...defaultProducts];
+
+                savedProducts.forEach(savedProduct => {
+                    const existingIndex = products.findIndex(
+                        p => p.productId === savedProduct.productId
+                    );
+
+                    // Only add products that aren't already present
+                    if (existingIndex === -1) {
+                        products.push(savedProduct);
+                    }
+                });
+
+                localStorage.setItem(
+                    'productData',
+                    JSON.stringify(products)
+                );
+
+                displayProducts();
+
+                console.log('Products loaded successfully');
+
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        loadProducts();
+
+    
 
 
         form.addEventListener('submit', function(event) {

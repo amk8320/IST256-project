@@ -1,0 +1,25 @@
+   {
+     "name": "ist256-project",
+     "version": "1.0.0",
+     "description": "",
+     "main": "startbootstrap-shop-homepage-gh-pages/startbootstrap-shop-homepage-gh-pages/server.js",
+     "scripts": {
+       "start": "node startbootstrap-shop-homepage-gh-pages/startbootstrap-shop-homepage-gh-pages/server.js"
+     },
+     "repository": {
+       "type": "git",
+       "url": "git+https://github.com/amk8320/IST256-project.git"
+     },
+     "keywords": [],
+     "author": "",
+     "license": "ISC",
+     "type": "commonjs",
+     "bugs": {
+       "url": "https://github.com/amk8320/IST256-project/issues"
+     },
+     "homepage": "https://github.com/amk8320/IST256-project#readme",
+     "dependencies": {
+       "cors": "^2.8.6",
+       "express": "^5.3.0"
+     }
+   }

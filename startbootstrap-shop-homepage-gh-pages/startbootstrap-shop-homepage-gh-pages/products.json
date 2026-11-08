@@ -1,10 +1,75 @@
+
 [
-  { "productId": "SH-001", "productName": "Nike Air Zoom Pegasus 41", "shoeType": "Running", "shoeSize": 10, "unit": "Pair", "price": 139.99, "weight": "10 oz" },
-  { "productId": "SH-002", "productName": "Nike LeBron 21", "shoeType": "Basketball", "shoeSize": 11, "unit": "Pair", "price": 199.99, "weight": "16 oz" },
-  { "productId": "SH-003", "productName": "Converse Chuck Taylor All Star", "shoeType": "Casual", "shoeSize": 9, "unit": "Pair", "price": 65, "weight": "13 oz" },
-  { "productId": "SH-004", "productName": "Timberland 6-Inch Premium Waterproof Boot", "shoeType": "Boots", "shoeSize": 10, "unit": "Pair", "price": 198, "weight": "30 oz" },
-  { "productId": "SH-005", "productName": "Allen Edmonds Park Avenue Oxford", "shoeType": "Dress", "shoeSize": 10, "unit": "Pair", "price": 395, "weight": "" },
-  { "productId": "SH-006", "productName": "New Balance 9060", "shoeType": "Casual", "shoeSize": 10, "unit": "Pair", "price": 160, "weight": "14 oz" },
-  { "productId": "SH-007", "productName": "UGG Tasman Slippers", "shoeType": "Casual", "shoeSize": 9, "unit": "Pair", "price": 130, "weight": "12 oz" },
-  { "productId": "SH-008", "productName": "On Cloud Sneakers", "shoeType": "Running", "shoeSize": 10, "unit": "Pair", "price": 170, "weight": "9 oz" }
+  {
+    "productId": "SHOE001",
+    "productName": "New Balance 9060",
+    "shoeType": "Casual",
+    "shoeSize": 10,
+    "unit": "Pair",
+    "price": 160,
+    "weight": ""
+  },
+  {
+    "productId": "SHOE002",
+    "productName": "Nike Running Sneakers",
+    "shoeType": "Running",
+    "shoeSize": 10,
+    "unit": "Pair",
+    "price": 80,
+    "weight": ""
+  },
+  {
+    "productId": "SHOE003",
+    "productName": "Boots",
+    "shoeType": "Boots",
+    "shoeSize": 10,
+    "unit": "Pair",
+    "price": 100,
+    "weight": ""
+  },
+  {
+    "productId": "SHOE004",
+    "productName": "On Cloud Sneakers",
+    "shoeType": "Running",
+    "shoeSize": 10,
+    "unit": "Pair",
+    "price": 170,
+    "weight": ""
+  },
+  {
+    "productId": "SHOE005",
+    "productName": "Dress Shoes",
+    "shoeType": "Dress",
+    "shoeSize": 10,
+    "unit": "Pair",
+    "price": 50,
+    "weight": ""
+  },
+  {
+    "productId": "SHOE006",
+    "productName": "UGG Tasman Slippers",
+    "shoeType": "Casual",
+    "shoeSize": 9,
+    "unit": "Pair",
+    "price": 130,
+    "weight": ""
+  },
+  {
+    "productId": "SHOE007",
+    "productName": "Flip Flops",
+    "shoeType": "Casual",
+    "shoeSize": 10,
+    "unit": "Pair",
+    "price": 39,
+    "weight": ""
+  },
+  {
+    "productId": "SHOE008",
+    "productName": "Basketball Sneakers",
+    "shoeType": "Basketball",
+    "shoeSize": 11,
+    "unit": "Pair",
+    "price": 135,
+    "weight": ""
+  }
 ]
