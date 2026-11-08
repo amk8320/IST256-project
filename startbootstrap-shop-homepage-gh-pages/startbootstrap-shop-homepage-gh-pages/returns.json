@@ -1,0 +1,15 @@
+{
+  "customer": { "fullName": "Jane Student", "orderId": "ORD-1001" },
+  "items": [
+    {
+      "productId": "SHOE001",
+      "productName": "New Balance 9060",
+      "price": 160,
+      "reason": "Wrong size",
+      "condition": "Unworn",
+      "comments": "Need a 9.5"
+    }
+  ],
+  "refundTotal": 160,
+  "submittedAt": "2026-11-08T22:00:00.000Z"
+}
