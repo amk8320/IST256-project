@@ -6,9 +6,14 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const mongoose = require('mongoose');
 
 const app = express();
 const PORT = 3000;
+
+mongoose.connect('mongodb://127.0.0.1:27017/shoecentral')
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.log('MongoDB connection error:', err.message));
 
 app.use(cors());                     // lets the HTML pages call this server
 app.use(express.json());             // parses JSON request bodies
@@ -163,35 +168,7 @@ app.patch('/api/submissions/:id', (req, res) => {
     res.json({ success: true, submission: item });
 });
 
-const RETURNS_FILE = path.join(__dirname, 'returns-data.json');
-const returnRecords = loadFile(RETURNS_FILE);
-
-app.post('/api/returns', (req, res) => {
-    const { customer, items } = req.body || {};
-
-    if (!customer || !customer.fullName || !customer.orderId ||
-        !Array.isArray(items) || items.length === 0) {
-        console.log('Rejected return request: missing fields');
-        return res.status(400).json({ success: false, message: 'Missing required return fields.' });
-    }
-
-    const record = {
-        id: 'RETURN-' + Date.now(),
-        receivedAt: new Date().toISOString(),
-        ...req.body
-    };
-    returnRecords.push(record);
-    saveFile(RETURNS_FILE, returnRecords);
-
-    console.log('Return received:', record.id, '-', customer.fullName,
-        '- items returned:', items.length);
-
-    res.status(201).json({ success: true, id: record.id, message: 'Return details received.' });
-});
-
-app.get('/api/returns', (req, res) => {
-    res.json(returnRecords);
-});
+app.use('/api/returns', require('./routes/returns'));
 
 // Start the server
 
