@@ -170,7 +170,7 @@ app.patch('/api/submissions/:id', (req, res) => {
 
 app.use('/api/returns', require('./routes/returns'));
 app.use('/api/shipping', require('./routes/shipping'));
-
+app.use('/api/products', require('./routes/crud')(require('./models/product')));
 // Start the server
 
 app.listen(PORT, () => {
