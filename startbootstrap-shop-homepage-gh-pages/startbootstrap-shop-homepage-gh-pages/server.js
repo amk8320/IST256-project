@@ -169,6 +169,7 @@ app.patch('/api/submissions/:id', (req, res) => {
 });
 
 app.use('/api/returns', require('./routes/returns'));
+app.use('/api/shipping', require('./routes/shipping'));
 
 // Start the server
 
