@@ -168,9 +168,22 @@ app.patch('/api/submissions/:id', (req, res) => {
     res.json({ success: true, submission: item });
 });
 
-app.use('/api/returns', require('./routes/returns'));
-app.use('/api/shipping', require('./routes/shipping'));
-app.use('/api/products', require('./routes/crud')(require('./models/product')));
+const returnsRouter = require('./routes/returns');
+const shippingRouter = require('./routes/shipping');
+const crudRouter = require('./routes/crud');
+const Product = require('./models/product');
+
+console.log('Returns:', typeof returnsRouter);
+console.log('Shipping:', typeof shippingRouter);
+console.log('CRUD:', typeof crudRouter);
+console.log('Product:', typeof Product);
+
+app.use('/api/returns', returnsRouter);
+app.use('/api/shipping', shippingRouter);
+app.use('/api/products', crudRouter(Product));
+//app.use('/api/returns', require('./routes/returns'));
+//app.use('/api/shipping', require('./routes/shipping'));
+//app.use('/api/products', require('./routes/crud')(require('./models/product')));
 // Start the server
 
 app.listen(PORT, () => {
