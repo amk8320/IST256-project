@@ -35,8 +35,14 @@ router.put('/:id', async (req, res) => {
 
 // Delete a return
 router.delete('/:id', async (req, res) => {
-  await Return.findByIdAndDelete(req.params.id);
+  const doc = await returnModel.findByIdAndDelete(req.params.id);
+
+  if (!doc) {
+    return res.status(404).json({
+      success: false,
+      message: 'Return not found.'
+    });
+  }
+
   res.json({ success: true });
 });
-
-module.exports = router;
