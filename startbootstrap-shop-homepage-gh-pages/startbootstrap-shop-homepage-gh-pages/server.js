@@ -7,6 +7,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
+const Billing = require('./models/billing');
 
 const app = express();
 const PORT = 3000;
@@ -20,7 +21,6 @@ app.use(express.json());             // parses JSON request bodies
 app.use(express.static(__dirname));  // serves the HTML/CSS/JS pages from this folder
 
 // ---------- Simple file-based storage helpers ----------
-const BILLING_FILE = path.join(__dirname, 'billing.json');
 const SUBMISSIONS_FILE = path.join(__dirname, 'submissions.json');
 
 function loadFile(file) {
@@ -35,18 +35,16 @@ function saveFile(file, data) {
     fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
 
-const billingRecords = loadFile(BILLING_FILE);
 const submissions = loadFile(SUBMISSIONS_FILE);
 
 // =====================================================
 //  BILLING
 // =====================================================
 
-// POST /api/billing - receive and process billing details
-app.post('/api/billing', (req, res) => {
+// POST /api/billing - save billing details to MongoDB
+app.post('/api/billing', async (req, res) => {
     const { customer, payment, order } = req.body || {};
 
-    // Server-side check (never trust the browser alone)
     if (!customer || !customer.fullName || !customer.address ||
         !payment || !payment.cardLast4 || !payment.expiry ||
         !order || !Array.isArray(order.items) || order.items.length === 0) {
@@ -54,23 +52,20 @@ app.post('/api/billing', (req, res) => {
         return res.status(400).json({ success: false, message: 'Missing required billing fields.' });
     }
 
-    const record = {
-        id: 'BILL-' + Date.now(),
-        receivedAt: new Date().toISOString(),
-        ...req.body
-    };
-    billingRecords.push(record);
-    saveFile(BILLING_FILE, billingRecords);
-
-    console.log('Billing received:', record.id, '-', customer.fullName,
-        '- total $' + order.total, '- card ending', payment.cardLast4);
-
-    res.status(201).json({ success: true, id: record.id, message: 'Billing details received.' });
+    try {
+        const record = await Billing.create(req.body);
+        console.log('Billing saved to MongoDB:', record._id, '-', customer.fullName,
+            '- total $' + order.total, '- card ending', payment.cardLast4);
+        res.status(201).json({ success: true, id: record._id, message: 'Billing details received.' });
+    } catch (err) {
+        console.log('Billing save error:', err.message);
+        res.status(500).json({ success: false, message: err.message });
+    }
 });
 
-// GET /api/billing - list saved records (good for testing in the browser)
-app.get('/api/billing', (req, res) => {
-    res.json(billingRecords);
+// GET /api/billing - list saved records from MongoDB
+app.get('/api/billing', async (req, res) => {
+    res.json(await Billing.find());
 });
 
 // =====================================================
