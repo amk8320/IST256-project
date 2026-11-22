@@ -176,6 +176,8 @@ console.log('Product:', typeof Product);
 app.use('/api/returns', returnsRouter);
 app.use('/api/shipping', shippingRouter);
 app.use('/api/products', crudRouter(Product));
+const OrderOption = require('./models/option');
+app.use('/api/options', crudRouter(OrderOption));
 //app.use('/api/returns', require('./routes/returns'));
 //app.use('/api/shipping', require('./routes/shipping'));
 //app.use('/api/products', require('./routes/crud')(require('./models/product')));
