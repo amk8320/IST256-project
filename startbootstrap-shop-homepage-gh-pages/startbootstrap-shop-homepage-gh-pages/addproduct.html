@@ -154,18 +154,10 @@
         const downloadButton = document.getElementById('downloadJson');
         const searchBox = document.getElementById('searchBox');
         const productTableBody = document.querySelector('#productTable tbody');
-        let products =[];
+        //changed to integrate products into mongoDB instead of localstorage
+        let products = [];
+        let editingId = null;
 
-        try{
-            products = JSON.parse(localStorage.getItem('productData')) || [];
-            if (!Array.isArray(products)) {
-                products = [];
-            }
-        }
-        catch (error) {
-            console.error('Error parsing JSON from localStorage:', error);
-            products = [];
-        }
         function displayProducts() {
             jsonOutput.textContent = JSON.stringify(products, null, 2);
             const searchTerm = searchBox.value.toLowerCase().trim();
@@ -174,7 +166,7 @@
                 if (
                     product.productId.toLowerCase().includes(searchTerm) ||
                     product.productName.toLowerCase().includes(searchTerm) ||
-                    product.shoeType.toLowerCase().includes(searchTerm)
+                    (product.shoeType || '').toLowerCase().includes(searchTerm)
                 ) {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -218,42 +210,26 @@
         // Search functionality
         searchBox.addEventListener('input', displayProducts);
 
-        // Load products from JSON
+        // Load products from mongoDB through node.js backend
         async function loadProducts() {
             try {
-                const response = await fetch('products.json');
+                const response = await fetch('/api/products');
 
                 if (!response.ok) {
-                    throw new Error('Unable to load products.json');
+                    throw new Error('Unable to load products from mongoDB');
                 }
 
-                const defaultProducts = await response.json();
-                const savedProducts = products;
+                products = await response.json();
 
-                products = [...defaultProducts];
+        displayProducts();
 
-                savedProducts.forEach(savedProduct => {
-                    const existingIndex = products.findIndex(
-                        p => p.productId === savedProduct.productId
-                    );
-
-                    // Only add products that aren't already present
-                    if (existingIndex === -1) {
-                        products.push(savedProduct);
-                    }
-                });
-
-                localStorage.setItem(
-                    'productData',
-                    JSON.stringify(products)
-                );
-
-                displayProducts();
-
-                console.log('Products loaded successfully');
+        console.log('Products loaded from MongoDB');
 
             } catch (error) {
                 console.error('Error loading products:', error);
+
+                message.textContent = 'Unable to load products from MongoDB.';
+                message.className = 'mt-3 text-danger';
             }
         }
 
@@ -262,7 +238,7 @@
     
 
 
-        form.addEventListener('submit', function(event) {
+        form.addEventListener('submit', async function(event) {
             event.preventDefault();
 
             if (!form.checkValidity()) {
@@ -283,22 +259,36 @@
                 weight: document.getElementById('weight').value.trim()
             };
 
-            products.push(product);
             try {
-                localStorage.setItem('productData', JSON.stringify(products));
+            const response = await fetch('/api/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(product)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Unable to save product');
             }
-            catch (error) {
-                products.pop();
-                message.textContent = 'Error saving product data.';
-                message.className = 'mt-3 text-danger';
-                return;
-            }
-            displayProducts();
-            message.textContent = 'Product data saved successfully!';
-            message.className = "mt-3 text-success";
+
+            await loadProducts();
+
+            message.textContent = 'Product saved to MongoDB successfully!';
+            message.className = 'mt-3 text-success';
+
             form.reset();
             form.classList.remove('was-validated');
-        });
+
+        } catch (error) {
+            console.error('Error saving product:', error);
+            message.textContent = error.message;
+            message.className = 'mt-3 text-danger';
+        }        
+    }
+);
         downloadButton.addEventListener('click', function() {
             const jsonData = JSON.stringify(products, null, 2);
             const blob = new Blob([jsonData], { type: 'application/json' });
