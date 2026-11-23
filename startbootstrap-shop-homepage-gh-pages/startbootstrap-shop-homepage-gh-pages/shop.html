@@ -75,13 +75,7 @@
             </div>
             <p class="fw-bold text-end">Total: $<span id="cartTotal">0.00</span></p>
             <div id="cartMessage" role="status"></div>
-            <button type="button" id="sendCartBtn" class="btn btn-dark">Send Cart to API</button>
-            <!-- Shows the JSON that was sent and what the REST API sent back -->
-            <div id="apiLog" class="row mt-3 d-none">
-              <div class="col-md-6">
-                <h3 class="h6">JSON sent (POST)</h3>
-                <pre id="apiRequest" class="bg-white border p-3 rounded small" style="max-height: 300px; overflow-y: auto;"></pre>
-              </div>
+            <a href="cart.html" id="checkoutLink" class="btn btn-dark">Go to Checkout</a>
               <div class="col-md-6">
                 <h3 class="h6">API response</h3>
                 <pre id="apiResponse" class="bg-white border p-3 rounded small" style="max-height: 300px; overflow-y: auto;"></pre>
@@ -328,34 +322,20 @@
             //  Product data
             // ============================================================
             // One entry per "Add to cart" button on this page (SHOE001-SHOE008).
-        async function loadProductData() {
-            try {
-                const response = await fetch('products.json');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const defaultProducts = await response.json();
-                let savedProducts = [];
-                try{
-                    savedProducts = JSON.parse(localStorage.getItem('productData')) || [];
-                } catch (e) {
-                    savedProducts = [];
-                }
-
-                const productData = [...defaultProducts];
-                
-                savedProducts.forEach(savedProduct => {
-                    const alreadyExists = productData.some(p => p.productId === product.productId);
-                    if (!alreadyExists) {
-                        productData.push(savedProduct);
+            async function loadProductData() {
+                try {
+                    const response = await fetch('/api/products');
+                    if (!response.ok) {
+                        throw new Error('Unable to load products from the server');
                     }
-                });
-                localStorage.setItem('productData', JSON.stringify(productData));
+                    const productData = await response.json();
 
-            }catch (error) {
-                console.error('Error loading product data:', error);
+                    localStorage.setItem('productData', JSON.stringify(productData));
+                    console.log('Loaded', productData.length, 'products from MongoDB');
+                } catch (error) {
+                    console.error('Error loading product data:', error);
+                }
             }
-        }
             loadProductData();
 
             const searchBox = document.getElementById('searchBox');
@@ -473,7 +453,7 @@
 
                 $('#cartTotal').text(cartTotal(cart).toFixed(2));
                 $('#cartCount').text(cart.length);
-                $('#sendCartBtn').prop('disabled', cart.length === 0);
+                $('checkoutLink').toggleClass('disabled', cart.length === 0);
             }
 
             // ============================================================
@@ -522,68 +502,7 @@
                 renderCart();
             });
 
-            // ============================================================
-            //  AJAX: send the cart (JSON document collection) to a RESTful API
-            // ============================================================
-            // Test REST API. JSONPlaceholder accepts a POST, echoes the JSON
-            // back, and adds an "id" (it does not actually save anything).
-            const API_URL = 'https://jsonplaceholder.typicode.com/posts';
-
-            $('#sendCartBtn').on('click', function () {
-                const cart = getCart();
-
-                if (cart.length === 0) {
-                    showMessage('warning', 'Your cart is empty. Add a shoe before sending.');
-                    return;
-                }
-
-                // 1. Prepare the data: wrap the cart items in one order document
-                const order = {
-                    orderId: 'ORD-' + Date.now(),
-                    orderDate: new Date().toISOString(),
-                    itemCount: cart.length,
-                    orderTotal: Number(cartTotal(cart).toFixed(2)),
-                    items: cart
-                };
-
-                const $btn = $(this);
-                $btn.prop('disabled', true).text('Sending...');
-                showMessage('info', 'Sending cart to the API...');
-
-                // 2. Send it with AJAX as a JSON POST request
-                $.ajax({
-                    url: API_URL,
-                    type: 'POST',
-                    contentType: 'application/json; charset=UTF-8', // what we send
-                    dataType: 'json',                               // what we expect back
-                    data: JSON.stringify(order),
-                    timeout: 10000
-                })
-                // 3. Success: show the server's response and empty the cart
-                .done(function (response, textStatus, xhr) {
-                    showMessage('success',
-                        'Cart sent! The API responded with status ' + xhr.status +
-                        ' and record id ' + response.id + '.');
-
-                    $('#apiRequest').text(JSON.stringify(order, null, 2));
-                    $('#apiResponse').text(JSON.stringify(response, null, 2));
-                    $('#apiLog').removeClass('d-none');
-
-                    saveCart([]);
-                    renderCart();
-                })
-                // 4. Error: tell the user and keep the cart so they can retry
-                .fail(function (xhr, textStatus) {
-                    const reason = xhr.status ? 'status ' + xhr.status : textStatus;
-                    showMessage('danger', 'Could not send the cart (' + reason + '). Please try again.');
-                })
-                .always(function () {
-                    $btn.text('Send Cart to API');
-                    $btn.prop('disabled', getCart().length === 0);
-                });
-            });
-
-            // Show whatever is already in the cart when the page loads
+           // show whatever is alreaeyd in the cart when the pack loads
             renderCart();
         </script>
 

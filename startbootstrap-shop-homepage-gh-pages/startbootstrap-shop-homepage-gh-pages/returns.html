@@ -169,7 +169,7 @@
         $scope.lastResponse = null;
 
         // ---------- AJAX GET: load products from the JSON document ----------
-        $http.get('products.json').then(function (res) {
+        $http.get('/api/products').then(function (res) {
             $scope.catalog = res.data;
         });
 

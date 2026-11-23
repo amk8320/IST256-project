@@ -178,6 +178,24 @@ app.use('/api/shipping', shippingRouter);
 app.use('/api/products', crudRouter(Product));
 const OrderOption = require('./models/option');
 app.use('/api/options', crudRouter(OrderOption));
+app.use((err, req, res, next) => {
+    let status = 500;
+
+    if (err.type === 'entity.parse.failed') {
+        status = 400;
+    }
+    else if (err.name === 'ValidationError') {
+        status = 400;
+    }
+    else if (err.name === 'CastError') {
+        status = 400;
+    }
+    else if (err.code === 11000) {
+        status = 409;
+    }
+    console.log('Error on', req.method, req.originalUrl, '-', err.message);
+    res.status(status).json({ success: false, message: err.message });
+});
 //app.use('/api/returns', require('./routes/returns'));
 //app.use('/api/shipping', require('./routes/shipping'));
 //app.use('/api/products', require('./routes/crud')(require('./models/product')));

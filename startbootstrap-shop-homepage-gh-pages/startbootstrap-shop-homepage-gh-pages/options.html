@@ -98,7 +98,7 @@
                 const [lastJson, setLastJson] = useState(null);
 
                 useEffect(() => {
-                    $.getJSON('products.json')
+                    $.getJSON('/api/products')
                         .done(function (data) {
                             setProducts(Array.isArray(data) ? data : []);
                         })

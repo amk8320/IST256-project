@@ -158,6 +158,12 @@
         let products = [];
         let editingId = null;
 
+
+        function escapeHTML(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
         function displayProducts() {
             jsonOutput.textContent = JSON.stringify(products, null, 2);
             const searchTerm = searchBox.value.toLowerCase().trim();
@@ -171,41 +177,92 @@
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${product.productId}</td>
-                        <td>${product.productName}</td>
+                        <td>${escapeHTML(product.productName)}</td>
                         <td>${product.shoeType}</td>
                         <td>${product.shoeSize}</td>
                         <td>${product.unit || ''}</td>
                         <td>$${product.price.toFixed(2)}</td>
                         <td>${product.weight || ''}</td>
-                        <td><button class="btn btn-sm btn-outline-danger delete-btn" data-index="${index}">Delete</button></td>
-                    `;
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary edit-btn me-1" data-index="${index}">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger delete-btn" data-index="${index}">Delete</button>
+                        </td>                    `;
                     productTableBody.appendChild(row);
                 }
             });
         }
         
-        productTableBody.addEventListener('click', function(event) {
-            if (event.target.classList.contains('delete-btn')) {
-                const index = Number(event.target.dataset.index);
-                const product = products[index];
+        productTableBody.addEventListener('click', async function (event) {
+    if (!event.target.classList.contains('delete-btn')) return;
 
-                if (!product) return;
+    const product = products[Number(event.target.dataset.index)];
+    if (!product) return;
 
-                if (confirm(`Are you sure you want to delete "${product.productName}"?`)) {
-                    products.splice(index, 1);
+    if (!confirm(`Are you sure you want to delete "${product.productName}"?`)) return;
 
-                    localStorage.setItem(
-                        'productData',
-                        JSON.stringify(products)
-                    );
+    try {
+        // Send DELETE to Node, which removes the product from MongoDB
+        const response = await fetch('/api/products/' + product._id, { method: 'DELETE' });
+        const result = await response.json();
 
-                    displayProducts();
+        if (!response.ok) {
+            throw new Error(result.message || 'Unable to delete product');
+        }
 
-                    message.textContent = 'Product deleted successfully!';
-                    message.className = 'mt-3 text-success';
-                }
-            }
-        });
+        await loadProducts();   // reload the list from MongoDB
+        message.textContent = 'Product deleted from MongoDB.';
+        message.className = 'mt-3 text-success';
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        message.textContent = error.message;
+        message.className = 'mt-3 text-danger';
+    }
+});
+    const submitBtn = document.getElementById('submitBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const productIdInput = document.getElementById('productId');
+
+    // Edit: copy the product into the form
+    productTableBody.addEventListener('click', function (event) {
+        if (!event.target.classList.contains('edit-btn')) return;
+
+        const product = products[Number(event.target.dataset.index)];
+        if (!product) return;
+
+        editingId = product._id;   
+
+        productIdInput.value = product.productId;
+        document.getElementById('productName').value = product.productName;
+        document.getElementById('shoeType').value = product.shoeType || '';
+        document.getElementById('shoeSize').value = product.shoeSize ?? '';
+        document.getElementById('unit').value = product.unit || 'Pair';
+        document.getElementById('price').value = product.price;
+        document.getElementById('weight').value = product.weight || '';
+
+        productIdInput.disabled = true;          // Product ID stays the same while editing
+        submitBtn.textContent = 'Update Product';
+        cancelBtn.classList.remove('d-none');    // show the Cancel Edit button
+
+        message.textContent = 'Editing ' + product.productName + '. Change the fields, then click Update Product.';
+        message.className = 'mt-3 text-primary';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Put the form back into "add new product" mode
+    function resetForm() {
+        editingId = null;
+        form.reset();
+        form.classList.remove('was-validated');
+        productIdInput.disabled = false;
+        submitBtn.textContent = 'Submit';
+        cancelBtn.classList.add('d-none');
+    }
+
+    cancelBtn.addEventListener('click', function () {
+        resetForm();
+        message.textContent = 'Edit cancelled.';
+        message.className = 'mt-3 text-muted';
+    });
 
         // Search functionality
         searchBox.addEventListener('input', displayProducts);
@@ -250,7 +307,7 @@
             }
 
             const product = {
-                productId: document.getElementById('productId').value.trim(),
+                productId: productIdInput.value.trim(),
                 productName: document.getElementById('productName').value.trim(),
                 shoeType: document.getElementById('shoeType').value,
                 shoeSize: Number(document.getElementById('shoeSize').value),
@@ -258,10 +315,12 @@
                 price: Number(document.getElementById('price').value),
                 weight: document.getElementById('weight').value.trim()
             };
-
+                const isEditing = editingId !== null;
+                const url = isEditing ? `/api/products/${editingId}` : '/api/products';
+                const method = isEditing ? 'PUT' : 'POST';
             try {
-            const response = await fetch('/api/products', {
-                method: 'POST',
+            const response = await fetch(url, {
+                method: method,
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -275,12 +334,9 @@
             }
 
             await loadProducts();
-
-            message.textContent = 'Product saved to MongoDB successfully!';
+            resetForm();
+            message.textContent = isEditing ? 'Product updated in MongoDB successfully!' : 'Product saved to MongoDB successfully!';
             message.className = 'mt-3 text-success';
-
-            form.reset();
-            form.classList.remove('was-validated');
 
         } catch (error) {
             console.error('Error saving product:', error);
